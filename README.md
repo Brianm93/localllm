@@ -1,4 +1,4 @@
-# localllm
+# local-llm
 
 Run LLMs locally on Cloud Workstations. Uses:
 
@@ -8,7 +8,7 @@ Run LLMs locally on Cloud Workstations. Uses:
 In this guide:
 
 * [Running as a Cloud Workstation](#running-as-a-cloud-workstation)
-* [llm commands](#llm-commands)
+* [local-llm commands](#local-llm-commands)
 * [Running locally](#running-locally)
 * [Debugging](#debugging)
 * [LLM disclaimer](#llm-disclaimer)
@@ -67,6 +67,9 @@ To get started, you'll need to have a [GCP Project][gcp] and have the `gcloud` C
     ```
 
 1. Configure a Cloud Workstation cluster.
+
+   **Wait for this to complete before moving forward** which can take
+   [up to 20 minutes](https://cloud.google.com/workstations/docs/create-cluster#workstation-cluster).
     ```shell
     gcloud workstations clusters create $LOCALLLM_CLUSTER \
       --region=$REGION
@@ -75,7 +78,7 @@ To get started, you'll need to have a [GCP Project][gcp] and have the `gcloud` C
 1. Create a Cloud Workstation configuration. We suggest using a machine type of e2-standard-32 which has 32 vCPU, 16
    core and 128 GB memory.
     ```shell
-    gcloud workstations configs create $LOCALLLM_WORKSTATION \
+    gcloud beta workstations configs create $LOCALLLM_WORKSTATION \
     --region=$REGION \
     --cluster=$LOCALLLM_CLUSTER \
     --machine-type=e2-standard-32 \
@@ -117,7 +120,7 @@ To get started, you'll need to have a [GCP Project][gcp] and have the `gcloud` C
 
 1. Start serving the default model from the repo.
     ```shell
-    llm run TheBloke/Llama-2-13B-Ensemble-v5-GGUF $LOCALLLM_PORT
+    local-llm run TheBloke/Llama-2-13B-Ensemble-v5-GGUF $LOCALLLM_PORT
     ```
 
 1. Get the hostname of the workstation using:
@@ -130,7 +133,10 @@ To get started, you'll need to have a [GCP Project][gcp] and have the `gcloud` C
 
 1. Interact with the model by visiting the live OpenAPI documentation page: `https://$LOCALLLM_PORT-$LLM_HOSTNAME/docs`.
 
-## llm commands
+## local-llm commands
+
+[!NOTE] The command is now `local-llm`, however the original command (`llm`) is supported
+inside of the [cloud workstations image](#running-as-a-cloud-workstation).
 
 Assumes that models are downloaded to `~/.cache/huggingface/hub/`. This is the default cache
 path used by Hugging Face Hub [library][hf-hub] and only supports `.gguf` files.
@@ -140,59 +146,59 @@ the model with 4 bit medium quantization, or you can specify a filename explicit
 
 1. List downloaded models.
     ```shell
-    llm list
+    local-llm list
     ```
 
 1. List running models. 
     ```shell
-    llm ps
+    local-llm ps
     ```
 
 1. Start serving models.
 
    1. Start serving the default model from the repo. Download if not present.
        ```shell
-       llm run TheBloke/Llama-2-13B-Ensemble-v5-GGUF 8000
+       local-llm run TheBloke/Llama-2-13B-Ensemble-v5-GGUF 8000
        ```
 
    1. Start serving a specific model. Download if not present.
        ```shell
-       llm run TheBloke/Llama-2-13B-Ensemble-v5-GGUF --filename llama-2-13b-ensemble-v5.Q4_K_S.gguf 8000
+       local-llm run TheBloke/Llama-2-13B-Ensemble-v5-GGUF --filename llama-2-13b-ensemble-v5.Q4_K_S.gguf 8000
        ```
 
 1. Stop serving models.
 
    1. Stop serving all models from the repo.
        ```shell
-       llm kill TheBloke/Llama-2-13B-Ensemble-v5-GGUF
+       local-llm kill TheBloke/Llama-2-13B-Ensemble-v5-GGUF
        ```
 
    1. Stop serving a specific model.
        ```shell
-       llm kill TheBloke/Llama-2-13B-Ensemble-v5-GGUF --filename llama-2-13b-ensemble-v5.Q4_K_S.gguf
+       local-llm kill TheBloke/Llama-2-13B-Ensemble-v5-GGUF --filename llama-2-13b-ensemble-v5.Q4_K_S.gguf
        ```
 
 1. Download models.
 
    1. Download the default model from the repo. 
        ```shell
-       llm pull TheBloke/Llama-2-13B-Ensemble-v5-GGUF
+       local-llm pull TheBloke/Llama-2-13B-Ensemble-v5-GGUF
        ```
    1. Download a specific model from the repo.
        ```shell
-       llm pull TheBloke/Llama-2-13B-Ensemble-v5-GGUF --filename llama-2-13b-ensemble-v5.Q4_K_S.gguf
+       local-llm pull TheBloke/Llama-2-13B-Ensemble-v5-GGUF --filename llama-2-13b-ensemble-v5.Q4_K_S.gguf
        ```
 
 1. Remove models.
 
    1. Remove all models downloaded from the repo.
        ```shell
-       llm rm TheBloke/Llama-2-13B-Ensemble-v5-GGUF
+       local-llm rm TheBloke/Llama-2-13B-Ensemble-v5-GGUF
        ```
 
    1. Remove a specific model from the repo.
        ```shell
-       llm rm TheBloke/Llama-2-13B-Ensemble-v5-GGUF --filename llama-2-13b-ensemble-v5.Q4_K_S.gguf
+       local-llm rm TheBloke/Llama-2-13B-Ensemble-v5-GGUF --filename llama-2-13b-ensemble-v5.Q4_K_S.gguf
        ```
 
 ## Running locally
@@ -201,12 +207,12 @@ the model with 4 bit medium quantization, or you can specify a filename explicit
     ```shell
     # Install the tools
     pip3 install openai
-    pip3 install ./llm-tool/.
+    pip3 install ./local-llm/.
     ```
 
 1. Download and run a model.
     ```shell
-    llm run TheBloke/Llama-2-13B-Ensemble-v5-GGUF 8000
+    local-llm run TheBloke/Llama-2-13B-Ensemble-v5-GGUF 8000
     ```
 
 1. Try out a query. The default query is for a haiku about cats.
@@ -219,31 +225,38 @@ the model with 4 bit medium quantization, or you can specify a filename explicit
 ## Debugging
 
 To assist with debugging, you can configure model startup to write logs to a log file by providing a yaml
-python logging configuration file (for example see [llm_log_config.yaml](../llm-tool/llm_log_config.yaml)):
+python logging configuration file:
 
 ```
-llm run TheBloke/Llama-2-13B-Ensemble-v5-GGUF 8000 --log-config llm_log_config.yaml
+local-llm run TheBloke/Llama-2-13B-Ensemble-v5-GGUF 8000 --log-config <some config file>
 ```
 
-If running from Cloud Workstations, logs from running models will be written to `/var/log/locallm.log`
-([llm_log_config.yaml](../llm-tool/llm_log_config.yaml) is provided by default via the environment variable
-`LOG_CONFIG` within the image). You can follow the logs with:
+To run locally using the bundled log config
+([log_config.yaml](../local-llm/log_config.yaml)):
 
 ```
-tail -f /var/log/localllm.log
+sudo touch /var/log/local-llm.log
+sudo chown user:user /var/log/local-llm.log # use your user and group
+
+# provide the log config manually
+local-llm run TheBloke/Llama-2-13B-Ensemble-v5-GGUF 8000 --log-config local-llm/log_config.yaml
+
+# or use an environment variable so you don't have to pass the argument
+export LOG_CONFIG=$(pip show local-llm | grep Location | awk '{print $2}')/log_config.yaml
+local-llm run TheBloke/Llama-2-13B-Ensemble-v5-GGUF 8000
 ```
 
-To run locally using the bundled log config:
+You can follow the logs with:
 
 ```
-sudo touch /var/log/localllm.log
-sudo chown user:user /var/log/localllm.log # use your user and group
-export LOG_CONFIG=$(pip show llm | grep Location | awk '{print $2}')/llm_log_config.yaml
-
-llm run ...
+tail -f /var/log/local-llm.log
 ```
 
 If you are running multiple models, the logs from each will be written to the same file and interleaved.
+
+If running from Cloud Workstations, logs from running models will be written to `/var/log/local-llm.log`
+([log_config.yaml](../local-llm/log_config.yaml) is provided by default via the environment variable
+`LOG_CONFIG` within the image).
 
 ## LLM Disclaimer
 

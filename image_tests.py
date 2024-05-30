@@ -32,8 +32,8 @@ PORT=8000
 LLAMA_REPO="TheBloke/Llama-2-13B-Ensemble-v5-GGUF"
 MISTRAL_REPO="TheBloke/openinstruct-mistral-7B-GGUF"
 
-RUN_COMMAND="llm run {} {} --verbose"
-KILL_COMMAND="llm kill {}"
+RUN_COMMAND="local-llm run {} {} --verbose"
+KILL_COMMAND="local-llm kill {}"
 
 
 def wait_for_llm(p):
@@ -90,6 +90,13 @@ class TestLLMs(unittest.TestCase):
             print(chat_completion.choices[0].message.content)
             return chat_completion.choices[0].message.content
 
+    def test_backward_compatible_command(self):
+        """Test original command works.
+
+        This was the original command and supported (in the cloud
+        workstations image only) for backward compatibility
+        """
+        subprocess.run("llm")
 
 if __name__ == "__main__":
     unittest.main()
